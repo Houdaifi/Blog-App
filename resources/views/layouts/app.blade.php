@@ -21,7 +21,7 @@
         </ul>
         <ul class="flex">
             @auth
-                <li class="p-3 font-semibold">{{ auth()->user()->username }}</li>
+                <li class="p-3 font-semibold"> <a href="{{route('dashboard')}}"> {{ auth()->user()->username }} </a></li>
                 <li class="p-3">
                     <form action="{{route('logout')}}" method="POST">
                         @csrf

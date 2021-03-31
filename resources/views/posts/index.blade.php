@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-   <div class="flex justify-center pt-6">
+   <div class="flex justify-center py-6">
       <div class="bg-white w-6/12 p-6 rounded-lg">Create a post:
          <form class="mb-4" action="{{route('posts')}}" method="POST">
          @csrf
@@ -49,6 +49,8 @@
 
                         <span class="bg-gray-400 text-xs rounded-lg text-white p-1">{{ $post->LikedBy->count() }} {{ Str::plural('Reactions', $post->LikedBy->count()) }}</span>
 
+                        <button class="bg-purple-400 text-xs rounded-lg text-white p-1 displayComment">{{ $post->comments->count() }} {{ Str::plural('Comments', $post->LikedBy->count()) }}</button>
+
                         <p class="text-xs pt-1 text-gray-600">
                            @if ($post->LikedBy->count())
                               By
@@ -59,12 +61,27 @@
                         </p>
 
                      </div>
-                     
+
+                     @foreach ($post->comments as $comment)
+                        <div class="AddedComment">
+                           <div class="pl-4 py-1 mt-2 bg-gray-100 rounded-lg shadow-lg">
+                              <h2 class="text-yellow-500 font-semibold text-base">{{$comment->user->name }}</h2>   
+                              <p class="text-sm">{{$comment->comment}}</p>
+                           </div>
+                        </div>
+                     @endforeach
+
+                     <textarea name="" rows="1" class="bg-gray-100 rounded-lg p-2 mt-2 w-full resize-y focus:ring focus:ring-purple-400 hidden newComment @error( 'comment' ) border-red-500 @enderror" data="{{ $post->id }}"></textarea>
                   </div>
 
-                  @if ($post->user_id == auth()->user()->id )
-                     <div class="flex">
 
+                  <!-- The 3 actions buttons : Add Comment, Edit Post, Delete Post -->
+                  <div class="flex">
+
+                     <div>
+                        <button class="text-purple-500 rounded-lg p-1 font-semibold shadow-lg commentPost focus:outline-none"><i class="far fa-comments"></i></button>
+                     </div>
+                     @if ($post->user_id == auth()->user()->id )
                         <div>
                            <button class="text-yellow-500 rounded-lg p-1 font-semibold shadow-lg editPost focus:outline-none"><i class="far fa-edit"></i></button>
                         </div>
@@ -76,9 +93,8 @@
                               <button class="text-red-500 rounded-lg p-1 font-semibold shadow-lg focus:outline-none"><i class="fas fa-trash"></i></button>
                            </form>
                         </div>
-                        
-                     </div>
-                  @endif
+                     @endif
+                  </div>
 
                </div>
             @endforeach
@@ -112,15 +128,16 @@
 
    $(document).ready(function(){
 
+      const currentUser = '{{auth()->user()->name}}';
+
       $.ajaxSetup({
-         headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-         });
+         headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
+      });
 
       $(".editPost").click(function(){
-         $(this).parent().parent().parent().find("#body").toggle();
-         $(this).parent().parent().parent().find(".newPost").toggle();
+         const thisPost = $(this).parent().parent().parent();
+         thisPost.find("#body").toggle();
+         thisPost.find(".newPost").text(thisPost.find("#body").text()).toggle();
          $(this).parent().find(".savePost").show();
       });
 
@@ -163,6 +180,31 @@
 
       $("#closePostModal").click(function(){
          $("#postModal").fadeOut();
+      });
+
+      $(".commentPost").click(function(){
+         $(this).parent().parent().parent().find('.newComment').toggle();
+      });
+
+      $(".newComment").keyup(function(e){
+         const commentArea = $(this);
+         var comment = $.trim(commentArea.val());
+         var postId = commentArea.attr('data');
+         if(e.key == "Enter"){
+            $.ajax({
+               url: "{{ url('posts/comment') }}",
+               method:'POST',
+               data:{comment:comment, post_id:postId},
+               success:function(response){
+                  $('.newComment').hide();
+                  commentArea.parent().find($('.AddedComment')).append('<div class="pl-4 py-1 mt-2 bg-gray-100 rounded-lg shadow-lg"><h2 class="text-yellow-500 font-semibold text-base">'+currentUser+'</h2><p class="text-sm">'+comment+'</p></div>');
+               }
+            });
+         }
+      });
+
+      $(".displayComment").click(function(){
+         $(this).parent().parent().parent().find('.CommentsField').toggle();
       });
 
    });

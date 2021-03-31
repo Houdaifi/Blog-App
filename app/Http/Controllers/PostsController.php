@@ -4,15 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\User;
+use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class PostsController extends Controller
 {
     public function index(){
 
-        $posts = Post::with('user')->latest()->paginate();
-
-        return view('posts.index', ['posts' => $posts]);
+        $posts = Post::with(['user', 'comments.user'])->latest()->paginate('3');
+        
+        return view('posts.index', ['posts' => $posts, "id" => 1]);
     }
 
     public function store(Request $request){
@@ -55,6 +56,7 @@ class PostsController extends Controller
 
     }
 
+    //Edit post
     public function EditPost(Request $request){
 
         $thisPost = Post::find($request->postId);
@@ -67,8 +69,19 @@ class PostsController extends Controller
 
     }
 
+    //Get User posts on Modal
     public function userPosts(Request $request)
     {
         return User::select('name', 'id')->where('id', $request->userID)->with('posts:body,user_id')->first()->toJson();
+    }
+
+    //Add new comment to the post
+    public function comment(Request $request)
+    {
+
+        $validation = $request->validate(['comment' => 'required', 'post_id' => 'required']);
+
+        $request->user()->comments()->create($validation);
+
     }
 }
