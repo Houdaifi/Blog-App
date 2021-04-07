@@ -1,77 +1,99 @@
-@extends('layouts.app')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
    <div class="flex justify-center py-6">
       <div class="bg-white w-6/12 p-6 rounded-lg">Create a post:
-         <form class="mb-4" action="{{route('posts')}}" method="POST">
-         @csrf
+         <form class="mb-4" action="<?php echo e(route('posts')); ?>" method="POST">
+         <?php echo csrf_field(); ?>
 
-            <textarea class="w-full bg-gray-100 border-2 p-2 rounded-lg my-2 focus:outline-none focus:border-yellow-500 @error('body') border-red-500 @enderror" name="body" id="" cols="30" rows="5" placeholder="Post anything!"></textarea><br>
+            <textarea class="w-full bg-gray-100 border-2 p-2 rounded-lg my-2 focus:outline-none focus:border-yellow-500 <?php $__errorArgs = ['body'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" name="body" id="" cols="30" rows="5" placeholder="Post anything!"></textarea><br>
 
-            @error('body')
-               <p class="text-red-500 text-sm pb-2">{{$message}}</p>
-            @enderror
+            <?php $__errorArgs = ['body'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+               <p class="text-red-500 text-sm pb-2"><?php echo e($message); ?></p>
+            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
 
             <button class="w-24 h-8 bg-yellow-600 text-white rounded-lg font-semibold">Submit</button>
 
          </form>
 
-         @if ($posts->count())
+         <?php if($posts->count()): ?>
 
             <h2 class="font-semibold mb-3 text-lg">Latest Posts:</h2>
             <hr class="text-gray-400 w-full pb-4">
-            @foreach ($posts as $post)
+            <?php $__currentLoopData = $posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
                <div class="flex justify-between parentDiv">
 
                   <div class="mb-4">
-                     <a class="text-yellow-600 pr-2 cursor-pointer UserLink" data="{{ $post->user->id }}">{{ $post->user->name }}</a><span class="text-gray-500 text-xs">{{ $post->created_at->diffForHumans() }}</span>
-                     <p id="body">{{ $post->body }}</p>
-                     <textarea class="bg-gray-100 rounded-lg p-2 w-full focus:ring focus:ring-yellow-500 resize-x hidden newPost" name="newPost" data="{{ $post->id }}"  cols="60" rows="3"></textarea>
+                     <a class="text-yellow-600 pr-2 cursor-pointer UserLink" data="<?php echo e($post->user->id); ?>"><?php echo e($post->user->name); ?></a><span class="text-gray-500 text-xs"><?php echo e($post->created_at->diffForHumans()); ?></span>
+                     <p id="body"><?php echo e($post->body); ?></p>
+                     <textarea class="bg-gray-100 rounded-lg p-2 w-full focus:ring focus:ring-yellow-500 resize-x hidden newPost" name="newPost" data="<?php echo e($post->id); ?>"  cols="60" rows="3"></textarea>
 
                      <!-- Like and Dislike Forms -->
                      <div class="flex space-x-2 mt-1">
-                        @if (!$post->isLiked())
+                        <?php if(!$post->isLiked()): ?>
 
-                           <form action="{{ route('posts.like', $post)}}" method="POST">
-                              @csrf
+                           <form action="<?php echo e(route('posts.like', $post)); ?>" method="POST">
+                              <?php echo csrf_field(); ?>
                               <button type="submit"><i class="fas fa-thumbs-up mr-3 text-blue-500 cursor-pointer"></i></button>
                            </form>
 
-                        @else
+                        <?php else: ?>
                         
-                           <form action="{{ route('posts.dislike', $post)}}" method="POST">
-                              @csrf
+                           <form action="<?php echo e(route('posts.dislike', $post)); ?>" method="POST">
+                              <?php echo csrf_field(); ?>
                               <button type="submit"><i class="fas fa-thumbs-down text-red-500 cursor-pointer"></i></button>
                            </form>
 
-                        @endif
+                        <?php endif; ?>
 
-                        <span class="bg-gray-400 text-xs rounded-lg text-white p-1">{{ $post->LikedBy->count() }} {{ Str::plural('Reactions', $post->LikedBy->count()) }}</span>
+                        <span class="bg-gray-400 text-xs rounded-lg text-white p-1"><?php echo e($post->LikedBy->count()); ?> <?php echo e(Str::plural('Reactions', $post->LikedBy->count())); ?></span>
 
-                        <button class="bg-purple-400 text-xs rounded-lg text-white p-1 displayComment">{{ $post->comments->count() }} {{ Str::plural('Comments', $post->LikedBy->count()) }}</button>
+                        <button class="bg-purple-400 text-xs rounded-lg text-white p-1 displayComment"><?php echo e($post->comments->count()); ?> <?php echo e(Str::plural('Comments', $post->LikedBy->count())); ?></button>
 
                         <p class="text-xs pt-1 text-gray-600">
-                           @if ($post->LikedBy->count())
+                           <?php if($post->LikedBy->count()): ?>
                               By
-                              @foreach ($post->LikedBy as $likedBy)
-                                 {{$likedBy->name}}{{ $loop->last ? '' : ',' }}
-                              @endforeach
-                           @endif
+                              <?php $__currentLoopData = $post->LikedBy; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $likedBy): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                 <?php echo e($likedBy->name); ?><?php echo e($loop->last ? '' : ','); ?>
+
+                              <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                           <?php endif; ?>
                         </p>
 
                      </div>
 
-                     @foreach ($post->comments as $comment)
+                     <?php $__currentLoopData = $post->comments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $comment): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <div class="AddedComment">
                            <div class="pl-4 py-1 mt-2 bg-gray-100 rounded-lg shadow-lg">
-                              <h2 class="text-yellow-500 font-semibold text-base">{{$comment->user->name }}</h2>   
-                              <p class="text-sm">{{$comment->comment}}</p>
+                              <h2 class="text-yellow-500 font-semibold text-base"><?php echo e($comment->user->name); ?></h2>   
+                              <p class="text-sm"><?php echo e($comment->comment); ?></p>
                            </div>
                         </div>
-                     @endforeach
+                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                     <textarea name="" rows="1" class="bg-gray-100 rounded-lg p-2 mt-2 w-full resize-y focus:ring focus:ring-purple-400 hidden newComment @error( 'comment' ) border-red-500 @enderror" data="{{ $post->id }}"></textarea>
+                     <textarea name="" rows="1" class="bg-gray-100 rounded-lg p-2 mt-2 w-full resize-y focus:ring focus:ring-purple-400 hidden newComment <?php $__errorArgs = [ 'comment' ];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> border-red-500 <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>" data="<?php echo e($post->id); ?>"></textarea>
                   </div>
 
 
@@ -81,29 +103,30 @@
                      <div>
                         <button class="text-purple-500 rounded-lg p-1 font-semibold shadow-lg commentPost focus:outline-none"><i class="far fa-comments"></i></button>
                      </div>
-                     @if ($post->user_id == auth()->user()->id )
+                     <?php if($post->user_id == auth()->user()->id ): ?>
                         <div>
                            <button class="text-yellow-500 rounded-lg p-1 font-semibold shadow-lg editPost focus:outline-none"><i class="far fa-edit"></i></button>
                         </div>
                         
                         <div>
-                           <form action="{{ url('posts',$post) }}" method="POST">
-                              @csrf
-                              @method('delete')
+                           <form action="<?php echo e(url('posts',$post)); ?>" method="POST">
+                              <?php echo csrf_field(); ?>
+                              <?php echo method_field('delete'); ?>
                               <button class="text-red-500 rounded-lg p-1 font-semibold shadow-lg focus:outline-none"><i class="fas fa-trash"></i></button>
                            </form>
                         </div>
-                     @endif
+                     <?php endif; ?>
                   </div>
 
                </div>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-            {{$posts->links()}}
+            <?php echo e($posts->links()); ?>
+
             
-         @else
+         <?php else: ?>
             <p class="text-red-500"> No posts yet</p>
-         @endif
+         <?php endif; ?>
       </div>
 
    </div>
@@ -127,7 +150,7 @@
   <script>
    $(document).ready(function(){
 
-      const currentUser = '{{auth()->user()->name}}';
+      const currentUser = '<?php echo e(auth()->user()->name); ?>';
 
       $.ajaxSetup({
          headers: {'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')}
@@ -146,7 +169,7 @@
          const postId = thisPost.attr('data');
          if(e.key == "Enter"){
             $.ajax({
-               url:"{{ url('posts/edit') }}",
+               url:"<?php echo e(url('posts/edit')); ?>",
                type:"POST",  
                data:{postId:postId, newPost:newPost},
                success:function(data){
@@ -161,7 +184,7 @@
       $(".UserLink").click(function(){
          const userID = $(this).attr('data');
          $.ajax({
-            url:"{{ url('posts/userPosts') }}",
+            url:"<?php echo e(url('posts/userPosts')); ?>",
             data:{userID:userID},
             dataType:'json',
             success:function(data){
@@ -191,7 +214,7 @@
          var postId = commentArea.attr('data');
          if(e.key == "Enter"){
             $.ajax({
-               url: "{{ url('posts/comment') }}",
+               url: "<?php echo e(url('posts/comment')); ?>",
                method:'POST',
                data:{comment:comment, post_id:postId},
                success:function(response){
@@ -210,4 +233,5 @@
   
   </script>
 
-@endsection
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH C:\laragon\www\PostyAPP\resources\views/posts/index.blade.php ENDPATH**/ ?>
